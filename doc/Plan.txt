@@ -1,0 +1,45 @@
+
+INPUT:	-The absolute path of the folder for music files to be changed
+	-The name of the output folder
+	
+OUTPUT:	-Moved Files into folders with the corresponding artist and album folder with the metadata updated
+	-An output file giving the success status of each file that was changed (or not)
+
+
+Steps:
+-Start with a directory with files that will be edited and moved inside it.
+-Run
+-Ask for absolute path of the directory with the files that will be edited
+-Ask for the name of the output folder
+
+-Create the output folder with the three subfolders that are based on success
+-Create the output status file in the root of the output folder
+
+-Get the list of files that will be modified in that directory
+-Loop through each file recursively, ignoreing the files in the specified output directory
+	-Determine the available tags
+	-Determine if the relavent information is available or not
+		=If the relavent information is not there, this should be recorded in the output file
+	-Pull the video information and put it in the comment tag (Uploader, upload date, original information)
+	-Keep track of the success status
+
+	
+	-Write out the success status of the file to the output file
+	-Based on the success status, move the file to the apropriate folder (Complete success, partial, failure)
+		-Check if the artist/album directory already exists
+			-If it does, move the file into that directory
+			-If it doesn't, create the directory and move the file
+
+
+
+For the consideration of complete success:
+	-Title
+	-Artist
+	-Album
+	-Date
+	-Comments
+
+Partial:
+	-Some data was found in the description, but not all
+Failure:
+	-No data could be found in the description and the title could not be parsed based on a guess

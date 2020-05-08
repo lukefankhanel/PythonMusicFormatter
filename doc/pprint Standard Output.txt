@@ -1,0 +1,25 @@
+Ogg Opus, 279.67 seconds (audio/ogg)
+LANGUAGE=eng
+ENCODER=Lavf57.71.100
+date=20130902
+DESCRIPTION=? Title: Libertus
+? Vocal: Chen-U
+? Arrangement: Maurits"?"Cornelis+Tim Vegas
+? Lyric: Laura April
+? Circle: ????~? (Hatsunetsumiko's)
+? Album: BOUQUET -Grand Finale-
+? Release Date: Aug 12, 2013 (Comiket 84)
+
+http://hatsunetsumikos.net/bqgf/
+
+? Original: ???????? / Starry Sky of Small Desires
+?????? ~ Ten Desires, final stage theme?
+
+? Illustration: Cis-trans
+http://www.pixiv.net/member.php?id=1006311
+http://patitcarol.xxxxxxxx.jp/index.html
+
+Enjoy!
+purl=https://www.youtube.com/watch?v=7Uiy0VY1TzY
+title=???????? ?Libertus? ?????~?? ?Subbed?
+artist=Alice Margatroid
