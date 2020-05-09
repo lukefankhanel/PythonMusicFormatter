@@ -43,3 +43,14 @@ Partial:
 	-Some data was found in the description, but not all
 Failure:
 	-No data could be found in the description and the title could not be parsed based on a guess
+
+
+
+
+JSON format:
+[
+	{"filename": "name",
+	"successStatus": "complete"
+	},
+	{}
+]
