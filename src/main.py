@@ -1,18 +1,50 @@
 
-import mutagen
+import mutagen.oggopus as mutagen
 import os
 import json
 import shutil
 import traceback
 
 #Make sure that the count of songs in the output is the same as the songs in the input
+#Fix issue with the directory loop overwritting files with the same name
+#Delete the old metadata at the end since it's stored in the comment tag
 
 def write_JSON(location, data):
     with open(location + "/Status Information.json", "w") as f:
         json.dump(data, f, indent=4)
 
+
+def upper_keys(music_file):
+    for key in music_file.keys():
+        music_file[key.upper()] = music_file.pop(key)
+
+def create_comment(music_file):
+    #print("EDITING FILE: " + music_file.filename)
+    values = ["---ORIGINAL METADATA---"]
+    for key in music_file.keys():
+        #print("EDITING KEY: " + key)
+        #print(music_file[key])
+
+        values_list = []
+        for counter in range(len(music_file[key])):
+            values_list.append("".join(["VALUE ", str(counter + 1), ": ", music_file[key][counter]])) # VALUE 1: {}
+
+        values.append(" ".join(["KEY=", key, ":", "VALUES=", "".join(values_list)])) # KEY= {} : VALUES= VALUE 1: {} \n
+    return "\n".join(values)
+
 def change_opus_file(file_path):
-    pass
+    music_file = mutagen.OggOpus(file_path)
+
+    upper_keys(music_file)
+    music_file["COMMENT"] = create_comment(music_file)
+
+    if "DESCRIPTION" in music_file.keys():
+        pass
+    
+    music_file.save()
+
+    
+        
 
 def change_m4a_file(file_path):
     pass
@@ -43,7 +75,7 @@ def create_output_folders(location, directory_names):
 
 def access_directory(start_location, output_folder_name):
 
-    output_folder_location = start_location + "/" + output_folder_name
+    output_folder_location = "".join([start_location, "/", output_folder_name])
 
     try:
         JSON_data = {}
@@ -69,11 +101,12 @@ def access_directory(start_location, output_folder_name):
                 dirnames.remove(output_folder_name)
             for f in filenames:
                 if f.endswith(".opus"):
-                    copy_file(dirpath + "/" + f, output_folder_location + "/" + f)
+                    copy_file("".join([dirpath, "/", f]), "".join([output_folder_location, "/", f]))
 
-                    #This is not right
-                    change_opus_file(dirpath + "/" + f)
-                    #Move file
+                    change_opus_file("".join([output_folder_location, "/", f]))
+                    
+                    #Move file based on the success status
+
                     music_counter += 1
                 elif f.endswith(".m4a"):
                     change_m4a_file(dirpath + "/" + f)
