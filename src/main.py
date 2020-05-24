@@ -4,6 +4,7 @@ import os
 import json
 import shutil
 import traceback
+import re
 
 #Path Names
 STATUS_INFORMATION_FILENAME = "Status Information.json"
@@ -12,6 +13,7 @@ ARTIST_NAME_TRANSLATIONS_FILENAME = "artistnames.json"
 #TODO Make sure that the count of songs in the output is the same as the songs in the input
 #TODO Fix issue with the directory loop overwritting files with the same name
 #TODO Delete the old metadata at the end since it's stored in the comment tag
+#TODO Check for links (why??) in the metadata and remove them
 
 def write_JSON(location, data):
     with open("/".join([location, STATUS_INFORMATION_FILENAME]), "w") as f:
@@ -21,7 +23,7 @@ def access_artist_name_translations():
     global artist_name_translations
     artist_name_translations = {}
     try:
-        with open("/".join([start_location, ARTIST_NAME_TRANSLATIONS_FILENAME])) as f:
+        with open("/".join([start_location, ARTIST_NAME_TRANSLATIONS_FILENAME]), encoding="UTF8") as f:
             artist_name_translations = json.load(f)
         return True
     except OSError:
@@ -47,35 +49,77 @@ def create_comment(music_file):
     return "\n".join(values)
 
 
-def parse_line(line):
+def check_japanese_characters(strings):
+    regex = "[一-龠ぁ-ゔァ-ヴーａ-ｚＡ-Ｚ０-９々〆〤]+"
+    return_array = []
+    for string in strings:
+        match = re.search(regex, string)
+        if match != None:
+            return_array.append(True)
+        else:
+            return_array.append(False)
+    return return_array
+
+
+
+def find_bracket_combination(text):
+    for brackets in bracket_types:
+        beginning_bracket_index = text.find(brackets[0])
+        end_bracket_index = text.find(brackets[1], beginning_bracket_index)
+        if beginning_bracket_index != -1 and end_bracket_index != -1:
+            return [beginning_bracket_index, end_bracket_index]
+    return 0
+
+def remove_character(text, position):
+    return text[:position] + text[(position + 1):]
+
+def strip_brackets(text):
+    pass
+
+
+
+def clean_line(line):
     for counter in range(len(line)):
         if line[counter].isalnum():
             return line[counter:]
     raise Exception("Could not find any alphanumeric character in the parsed line.")
 
+
+#Modify the metadata term that was found in the description to the correct format
 def parse_term_line(line, key):
     if key == "Artist":
-        parsed_line = parse_line(line)
-        for brackets in bracket_types:
-            beginning_bracket_index = parsed_line.find(brackets[0])
-            end_bracket_index = parsed_line.find(brackets[1], beginning_bracket_index)
-            if beginning_bracket_index != -1 and end_bracket_index != -1:
-                parsed_line = parsed_line[beginning_bracket_index + 1 : end_bracket_index]
-            print(parsed_line)
-            #Find out how to check if a character is Japanese
+        parsed_line = clean_line(line)
+        while(find_bracket_combination(parsed_line) != 0):
+            bracket_locations = find_bracket_combination(parsed_line)
+            split_line = parsed_line.partition(parsed_line[bracket_locations[0]:(bracket_locations[1] + 1)])
+            boolean_list = check_japanese_characters(split_line)
+            if boolean_list[1] == False:
+                parsed_line = (split_line[1])[1:-1]
+            else:
+                parsed_line = split_line[0] + split_line[2]
+
+        for artist in artist_name_translations:
+            if artist["Correct Name"] == parsed_line:
+                return parsed_line
+            else:
+                for name in artist["Possible Names"]:
+                    if name == parsed_line:
+                        return artist["Correct Name"]
+        return parsed_line
+
     
     #Check the final artist string against the list of artist names and translate it if it's found
 
     elif key == "Date":
         pass
     else:
-        return parse_line(line)
+        return clean_line(line)
 
 
 def parse_description(description, find_terms):
     return_dictionary = {}
 
-
+    #TODO Might not be foolproof if there is a term that is matched in a sentence before the list of song information
     for key in find_terms.keys():
         for term in find_terms[key]:
             if description.find(term) != -1:
@@ -94,8 +138,9 @@ def change_opus_file(file_path):
 
     if "description" in music_file.keys():
         #Compare this against what is returned
+        #TODO Make this mutable
         find_terms = {
-            "Title": ["Title"],
+            "Title": ["Title Translation", "Title"],
             "Album": ["Album"],
             "Artist": ["Artist", "Circle"],
             "Date": ["Date"],
@@ -191,6 +236,9 @@ def access_directory():
     
 
 def main():
+    #start_location is the main root directory that the program will scan from
+    #output_folder_name is the name of the folder that the converted music files will be moved to
+    #output_folder_location is the combination of the start_location and the output_folder_name
     global start_location, output_folder_name, output_folder_location, bracket_types
 
     start_location = get_music_files_location_input() 
