@@ -14,6 +14,7 @@ ARTIST_NAME_TRANSLATIONS_FILENAME = "artistnames.json"
 #TODO Fix issue with the directory loop overwritting files with the same name
 #TODO Delete the old metadata at the end since it's stored in the comment tag
 #TODO Check for links (why??) in the metadata and remove them
+#TODO Combine JSON file into one file
 
 def write_JSON(location, data):
     with open("/".join([location, STATUS_INFORMATION_FILENAME]), "w") as f:
@@ -50,7 +51,8 @@ def create_comment(music_file):
 
 
 def check_japanese_characters(strings):
-    regex = "[一-龠ぁ-ゔァ-ヴーａ-ｚＡ-Ｚ０-９々〆〤]+"
+    #https://stackoverflow.com/questions/6787716/regular-expression-for-japanese-characters
+    regex = r"[一-龠ぁ-ゔァ-ヴーａ-ｚＡ-Ｚ０-９々〆〤]+"
     return_array = []
     for string in strings:
         match = re.search(regex, string)
@@ -79,10 +81,19 @@ def strip_brackets(text):
 
 
 def clean_line(line):
-    for counter in range(len(line)):
-        if line[counter].isalnum():
-            return line[counter:]
-    raise Exception("Could not find any alphanumeric character in the parsed line.")
+    return_string = None
+
+    for enumerator in enumerate(line):
+        if line[enumerator[0]].isalnum():
+            return_string = line[enumerator[0]:]
+            break
+    
+    #TODO Get rid of spaces at the end and check for links
+
+    if return_string is None:
+        raise Exception("Could not find any alphanumeric character in the parsed line.")
+    else:
+        return return_string
 
 
 #Modify the metadata term that was found in the description to the correct format
@@ -98,6 +109,7 @@ def parse_term_line(line, key):
             else:
                 parsed_line = split_line[0] + split_line[2]
 
+        #Check the final artist string against the list of artist names and translate it if it's found
         for artist in artist_name_translations:
             if artist["Correct Name"] == parsed_line:
                 return parsed_line
@@ -107,11 +119,15 @@ def parse_term_line(line, key):
                         return artist["Correct Name"]
         return parsed_line
 
-    
-    #Check the final artist string against the list of artist names and translate it if it's found
-
     elif key == "Date":
-        pass
+        #: Aug 12, 2013 (Comiket 84) -- Matches 2013
+        regex = r"20{1}\d{2}"
+        match = re.search(regex, line)
+        if match is not None:
+            return match.group(0)
+        else:
+            return None
+
     else:
         return clean_line(line)
 
@@ -124,7 +140,9 @@ def parse_description(description, find_terms):
         for term in find_terms[key]:
             if description.find(term) != -1:
                 term_line = (((description.partition(term))[2]).partition("\n"))[0]
-                return_dictionary[key] = parse_term_line(term_line, key)
+                parsed_line = parse_term_line(term_line, key)
+                if parsed_line is not None:
+                    return_dictionary[key] = parsed_line
                 break
 
     return return_dictionary
