@@ -24,8 +24,6 @@ def main():
         metavar="\b",
         help='A required integer positional argument')
 
-
-
     arguments = argumentParser.parse_args()
 
 
@@ -35,10 +33,11 @@ def main():
     for (dirpath, dirnames, filenames) in os.walk(arguments.workingFolder):
         for filePath in filenames:
             file = audiotypes.createFileObject(os.path.join(dirpath, filePath), jm.getInputJSONDictionary())
-            if not file:
-                pass
-            else:
+            if file:
+                file.findUpdateSongInformation()
                 jm.appendObject(file.serializeToDictionary())
+                
+
         break
     print("MADE IT HERE")
     jm.outputJSONArray()

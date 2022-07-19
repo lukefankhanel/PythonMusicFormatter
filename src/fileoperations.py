@@ -69,7 +69,8 @@ class JSONManager:
                     "title": False,
                     "album": False,
                     "artist": False,
-                    "date": False
+                    "date": False,
+                    "delimiters": False
                 }
                 for key, value in fields.items():
                     if len(value) < 1:
@@ -81,7 +82,7 @@ class JSONManager:
                     if value == False:
                         raise KeyError 
         except KeyError:
-            printErrorMessage("Couldn't find required fields in loaded JSON file.", True)
+            printErrorMessage("Couldn't find required fields in loaded JSON file.", True) #TODO List out JSON format
         except FileNotFoundError:
             printErrorMessage("Couldn't read from supplied settings JSON file.", True)
         except json.JSONDecodeError:

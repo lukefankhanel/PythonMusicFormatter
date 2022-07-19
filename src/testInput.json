@@ -1,0 +1,17 @@
+{
+    "metadataFieldMatches":
+        {
+            "title": ["Title Translation", "Title"],
+            "album": ["Album"],
+            "artist": ["Artist", "Circle"],
+            "date": ["Date"],
+            "delimiters": [":", "："]
+        },
+    "artistNameTranslations":
+        [
+            {
+                "incorrectNameList": ["Touhou Jihen", "NSY"],
+                "correctName": "東方事変"
+            }
+        ]
+}
