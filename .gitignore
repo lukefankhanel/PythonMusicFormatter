@@ -1,4 +1,6 @@
 
 .vscode/
 testfiles/
+testing/
 virtualenvironment/
+src/__pycache__
