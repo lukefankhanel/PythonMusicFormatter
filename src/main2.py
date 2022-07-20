@@ -34,12 +34,13 @@ def main():
         for filePath in filenames:
             file = audiotypes.createFileObject(os.path.join(dirpath, filePath), jm.getInputJSONDictionary())
             if file:
+                print("Processing music file: " + file.getFileLocation())
                 file.findUpdateSongInformation()
+                print(file.applyNameTranslations())
                 jm.appendObject(file.serializeToDictionary())
-                
-
+                print("Song processing complete, continuing...\n\n-----------------\n")
         break
-    print("MADE IT HERE")
+    print("Finished processing songs, outputting JSON log file...")
     jm.outputJSONArray()
 
 if __name__ == "__main__":
